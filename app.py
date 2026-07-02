@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+import os
 
 # 1. 페이지 테마 및 레이아웃 설정
 st.set_page_config(page_title="AAD NEWS - Drone Portal", layout="wide", page_icon="🛸")
