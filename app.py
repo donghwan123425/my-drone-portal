@@ -24,7 +24,7 @@ NAVER_CLIENT_ID = "Dp2Lci9FjuMH500UIKQ2".strip()
 NAVER_CLIENT_SECRET = "RxFmGfyBA8".strip()
 
 # 헤더 디자인
-st.title("🛸드론·국방·AI 종합 뉴스 포털")
+st.title("🛸Ai Army Drone News \n드론·국방·AI 종합 뉴스 포털")
 st.caption("드론과 융합된 군사 및 AI 이슈만 엄선하여, 최근 한 달 이내의 기사를 최신순으로 정렬합니다.")
 st.markdown("<hr style='border: 1px solid #03c75a;'>", unsafe_allow_html=True)
 
