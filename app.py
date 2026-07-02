@@ -40,8 +40,8 @@ st.markdown("""
 # ⚠️ [필수] 본인의 네이버 API 키를 입력하세요!
 # (여기에 발급받으신 본인의 Client ID와 Secret Key를 문자열로 꼭 채워주세요)
 # 예: NAVER_CLIENT_ID = "abcde12345"
-NAVER_CLIENT_ID = "os.environ.get("NAVER_CLIENT_ID", "")".strip()
-NAVER_CLIENT_SECRET = "os.environ.get("NAVER_CLIENT_SECRET", "")".strip()
+NAVER_CLIENT_ID = os.environ.get("NAVER_CLIENT_ID", "").strip()
+NAVER_CLIENT_SECRET = os.environ.get("NAVER_CLIENT_SECRET", "").strip()
 
 # 2. 헤더에 AAD NEWS 로고 배치
 st.markdown(f"""
