@@ -3,10 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
-# 1. 페이지 테마 및 네이버 감성 레이아웃 설정
-st.set_page_config(page_title="Naver Style Drone Portal", layout="wide", page_icon="🛸")
+# 1. 페이지 테마 및 레이아웃 설정
+st.set_page_config(page_title="AAD NEWS - Drone Portal", layout="wide", page_icon="🛸")
 
-# 포털 뉴스 특유의 깔끔한 보더와 폰트 스타일링 CSS
+# CSS 커스텀 스타일링
 st.markdown("""
     <style>
     .main { background-color: #f5f6f7; }
@@ -16,19 +16,51 @@ st.markdown("""
     .news-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
     .news-snippet { font-size: 14px; color: #444; line-height: 1.6; }
     .category-badge { background-color: #f1f3f5; color: #666; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-right: 6px; }
+    
+    /* 로고 이미지와 텍스트를 정렬하는 스타일 */
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .logo-text-large {
+        font-size: 28px;
+        font-weight: bold;
+        color: #03c75a;
+        margin-bottom: -5px;
+    }
+    .logo-text-small {
+        font-size: 12px;
+        color: #888;
+        letter-spacing: 0.5px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 # ⚠️ [필수] 본인의 네이버 API 키를 입력하세요!
+# (여기에 발급받으신 본인의 Client ID와 Secret Key를 문자열로 꼭 채워주세요)
+# 예: NAVER_CLIENT_ID = "abcde12345"
 NAVER_CLIENT_ID = "Dp2Lci9FjuMH500UIKQ2".strip()
 NAVER_CLIENT_SECRET = "RxFmGfyBA8".strip()
 
-# 헤더 디자인
-st.title("🛸Ai Army Drone News \n드론·국방·AI 종합 뉴스 포털")
+# 2. 헤더에 AAD NEWS 로고 배치
+st.markdown(f"""
+    <div class="logo-container">
+        <img src="https://img.icons8.com/color/96/000000/drone.png" width="65">
+        <div>
+            <div class="logo-text-large">AAD NEWS</div>
+            <div class="logo-text-small">AI ARMY DRONE NEWS</div>
+        </div>
+        <div style="font-size: 22px; font-weight: bold; color: #222; margin-left: 20px; border-left: 2px solid #e3e7eb; padding-left: 20px;">
+            🛸Ai Army Drone News \n드론·국방·AI 종합 포털
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
 st.caption("드론과 융합된 군사 및 AI 이슈만 엄선하여, 최근 한 달 이내의 기사를 최신순으로 정렬합니다.")
 st.markdown("<hr style='border: 1px solid #03c75a;'>", unsafe_allow_html=True)
 
-# 2. 기사 실시간 텍스트 본문 추출 함수
+# 3. 기사 실시간 텍스트 본문 추출 함수
 def fetch_full_text(url):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     try:
@@ -45,7 +77,7 @@ def fetch_full_text(url):
     except:
         return "본문 상세 내용은 아래 원문 읽기 버튼을 이용해 주세요."
 
-# 3. 네이버 뉴스 썸네일 이미지 추출 함수
+# 4. 네이버 뉴스 썸네일 이미지 추출 함수
 def get_naver_thumbnail(url):
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     fallback_img = "https://via.placeholder.com/140x90.png?text=No+Image"
@@ -61,11 +93,11 @@ def get_naver_thumbnail(url):
         pass
     return fallback_img
 
-# 4. 한 달 이내 필터링 및 드론 연관성 검증 API 호출 함수
+# 5. 한 달 이내 필터링 및 드론 연관성 검증 API 호출 함수
 @st.cache_data(ttl=300)
 def fetch_portal_news(search_keyword):
-    if NAVER_CLIENT_ID == "여기에_발급받은_Client_ID_입력":
-        st.error("⚠️ 코드 22, 23번 줄에 네이버 API 키를 먼저 입력해 주세요!")
+    if NAVER_CLIENT_ID == "여기에_발급받은_Client_ID_입력" or not NAVER_CLIENT_ID:
+        st.error("⚠️ 코드에 네이버 API 키를 먼저 입력해 주세요!")
         return []
         
     url = f"https://openapi.naver.com/v1/search/news.json?query={search_keyword}&display=100&sort=date"
@@ -82,7 +114,6 @@ def fetch_portal_news(search_keyword):
         now = datetime.now()
         one_month_ago = now - timedelta(days=30)
         
-        # 🎯 드론 포털의 정체성을 지키기 위한 필수 키워드 버킷
         drone_must_keywords = ["드론", "drone", "무인기", "무인 체계", "UAM", "항공", "플라잉카", "무인기체", "쿼드콥터"]
 
         for item in data.get("items", []):
@@ -101,7 +132,6 @@ def fetch_portal_news(search_keyword):
             description = item["description"].replace("<b>", "").replace("</b>", "").replace("&quot;", '"').replace("&amp;", "&")
             link = item["originallink"] if item["originallink"] else item["link"]
             
-            # 🔥 [핵심 업데이트] 제목이나 요약문에 '드론 관련 단어'가 아예 없으면 포털에서 원천 배제 (노이즈 필터링)
             text_to_check = (title + description).lower()
             if not any(keyword in text_to_check for keyword in drone_must_keywords):
                 continue
@@ -109,7 +139,6 @@ def fetch_portal_news(search_keyword):
             if any(banned in title for banned in ["드론 패턴", "완구용"]):
                 continue
 
-            # 카테고리 매핑
             if any(k in title for k in ["정부", "규제", "법안", "국토부", "정책"]):
                 category, analysis = "📜 규제/정책", "정부 주도 규제 완화 및 제도적 가이드라인 동향입니다."
             elif any(k in title for k in ["전쟁", "안보", "군사", "공격", "방산", "러시아", "우크라", "전투", "군", "합참"]):
@@ -134,7 +163,7 @@ def fetch_portal_news(search_keyword):
     except:
         return []
 
-# 5. 사이드바 구성
+# 6. 사이드바 구성
 st.sidebar.header("🔍 역대 뉴스 통합 검색")
 user_search = st.sidebar.text_input("검색하고 싶은 키워드를 입력하세요", placeholder="예: 소형 드론, 우크라이나, 인공지능")
 
@@ -144,7 +173,8 @@ if user_search.strip():
 else:
     final_query = "드론,군사,AI"
 
-if st.sidebar.button("🔄 포털 뉴스 동기화 (F5)", use_container_width=True):
+# 🔥 [업데이트] use_container_width=True 대신 width='stretch' 사용
+if st.sidebar.button("🔄 포털 뉴스 동기화 (F5)", width='stretch'):
     st.cache_data.clear()
     st.toast("실시간 포털 테크 뉴스를 완벽하게 새로고침했습니다!")
 
@@ -155,7 +185,7 @@ selected_categories = st.sidebar.multiselect(
     default=["🔋 기술/트렌드", "📜 규제/정책", "🚀 비즈니스", "⚔️ 군사/안보"]
 )
 
-# 6. 메인 화면 출력 로직
+# 7. 메인 화면 출력 로직
 all_news = fetch_portal_news(final_query)
 filtered_news = [n for n in all_news if n['category'] in selected_categories]
 
@@ -174,9 +204,10 @@ else:
         with col1:
             thumb_img = get_naver_thumbnail(news['link'])
             try:
-                st.image(thumb_img, use_container_width=True)
+                # 🔥 [업데이트] use_container_width=True 대신 width='stretch' 사용
+                st.image(thumb_img, width='stretch')
             except:
-                st.image("https://via.placeholder.com/140x90.png?text=No+Image", use_container_width=True)
+                st.image("https://via.placeholder.com/140x90.png?text=No+Image", width='stretch')
             
         with col2:
             st.markdown(f"""
